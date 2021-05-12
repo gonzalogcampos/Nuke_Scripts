@@ -7,6 +7,8 @@ import nukescripts
 # It memorizes the current value of motionblur for each node and sets it to 0
 # Then when you reactivate the motionblur recovers the last value.
 
+loaded = False
+
 class Panel(nukescripts.panels.PythonPanel):
 
     def __init__(self):
@@ -27,10 +29,28 @@ class Panel(nukescripts.panels.PythonPanel):
         self.addKnob(self.motionblurKnob)
         self.addKnob(self.rotoKnob)
 
+def close():
+    for node in nuke.allNodes():
+        if node.Class() == 'Transform' or node.Class() == 'CornerPin2D':
+            if node.knob('aux_motionblur'):
+                node.knob('motionblur').setValue(node.knob('aux_motionblur').getValue())
+                node.knob('motionblur').setEnabled(True)
+                node.removeKnob(node.knob('aux_motionblur'))
+        elif node.Class() == 'Roto' and node.knob('motionblur_mode').getValue()==1:
+            if node.knob('aux_motionblur'):
+                node.knob('global_motionblur').setValue(node.knob('aux_motionblur').getValue())
+                node.knob('global_motionblur').setEnabled(True)
+                node.removeKnob(node.knob('aux_motionblur'))
+        elif node.Class() == 'MotionBlur':
+            if node.knob('aux_motionblur'):
+                node.knob('disable').setValue(node.knob('aux_motionblur').getValue())
+                node.knob('disable').setEnabled(True)
+                node.removeKnob(node.knob('aux_motionblur'))
+
+
 
 #DEACTIVATION
 def OptiMotionblur_D():
-
 
     p = Panel()
     if not p.showModalDialog():
@@ -40,8 +60,6 @@ def OptiMotionblur_D():
     cornerpin = p.knobs()['cornerpin'].value()
     motionblur = p.knobs()['motionblur'].value()
     roto = p.knobs()['roto'].value()
-
-
 
     for node in nuke.allNodes():
         if (node.Class() == 'Transform' and transform) or (node.Class() == 'CornerPin2D' and cornerpin):
@@ -69,6 +87,10 @@ def OptiMotionblur_D():
                 node.knob('disable').setValue(True)
                 node.knob('disable').setEnabled(False)
 
+    if not loaded:
+        nuke.addOnScriptClose(close)
+        loaded = True
+
 
 #REACTIVATIONl s
 def OptiMotionblur_A():
@@ -83,17 +105,17 @@ def OptiMotionblur_A():
     roto = p.knobs()['roto'].value()
 
     for node in nuke.allNodes():
-        if node.Class() == 'Transform' or node.Class() == 'CornerPin2D':
+        if (node.Class() == 'Transform' and transform) or (node.Class() == 'CornerPin2D' and cornerpin):
             if node.knob('aux_motionblur'):
                 node.knob('motionblur').setValue(node.knob('aux_motionblur').getValue())
                 node.knob('motionblur').setEnabled(True)
                 node.removeKnob(node.knob('aux_motionblur'))
-        elif node.Class() == 'Roto' and node.knob('motionblur_mode').getValue()==1:
+        elif roto and node.Class() == 'Roto' and node.knob('motionblur_mode').getValue()==1:
             if node.knob('aux_motionblur'):
                 node.knob('global_motionblur').setValue(node.knob('aux_motionblur').getValue())
                 node.knob('global_motionblur').setEnabled(True)
                 node.removeKnob(node.knob('aux_motionblur'))
-        elif node.Class() == 'MotionBlur':
+        elif motionblur and node.Class() == 'MotionBlur':
             if node.knob('aux_motionblur'):
                 node.knob('disable').setValue(node.knob('aux_motionblur').getValue())
                 node.knob('disable').setEnabled(True)
