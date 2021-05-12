@@ -33,7 +33,7 @@ def OptiMotionblur_D():
 
 
     p = Panel()
-    if not p.showModal():
+    if not p.showModalDialog():
         return
     
     transform = p.knobs()['transform'].value()
@@ -74,7 +74,7 @@ def OptiMotionblur_D():
 def OptiMotionblur_A():
 
     p = Panel()
-    if not p.show():
+    if not p.showModalDialog():
         return
     
     transform = p.knobs()['transform'].value()
