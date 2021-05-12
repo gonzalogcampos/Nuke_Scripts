@@ -7,7 +7,7 @@ import nukescripts
 # It memorizes the current value of motionblur for each node and sets it to 0
 # Then when you reactivate the motionblur recovers the last value.
 
-loaded = False
+_optimbloaded = False
 
 class Panel(nukescripts.panels.PythonPanel):
 
@@ -56,6 +56,8 @@ def OptiMotionblur_D():
     if not p.showModalDialog():
         return
     
+    global _optimbloaded
+
     transform = p.knobs()['transform'].value()
     cornerpin = p.knobs()['cornerpin'].value()
     motionblur = p.knobs()['motionblur'].value()
@@ -87,9 +89,9 @@ def OptiMotionblur_D():
                 node.knob('disable').setValue(True)
                 node.knob('disable').setEnabled(False)
 
-    if not loaded:
+    if not _optimbloaded:
         nuke.addOnScriptClose(close)
-        loaded = True
+        _optimbloaded = True
 
 
 #REACTIVATIONl s
